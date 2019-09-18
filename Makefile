@@ -1,11 +1,13 @@
 CPP=g++
 CPPFLAGS=-Wall
 
-default : main.o
-	$(CPP) $(CPPFLAGS) -o cipher main.o
+default : main.o Cipher.o
+	$(CPP) $(CPPFLAGS) -o cipher main.o Cipher.o
 
-main.o : main.cc cipher.h
-	$(CPP) $(CPPFLAGS) -c main.cc
+
+Cipher.o:: Cipher.h 
+main.o:: main.cc Cipher.o
+
 
 clean :
-	rm -rf *.o cipher *.hh
+	rm -rf *.o cipher *.h.gch

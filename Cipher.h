@@ -6,13 +6,14 @@
 
 class Cipher {
   public:
-    Cipher(string keyFile, string inputFile) : keyFileName(keyFile), 
-      inputFileName(inputFile) {};
+    Cipher(std::string, std::string, bool);
     ~Cipher() = default;
-    
+
   private:
     std::string keyFileName;
     std::string inputFileName;
+    char blockKey[8];
+    bool isBlockCipher;
 };
 
 #endif /* CIPHER_H_INCLUDED */

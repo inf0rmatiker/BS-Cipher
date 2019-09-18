@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "Cipher.h"
 
 using namespace std;
 
@@ -60,6 +61,7 @@ int main(int argc, char* argv[]) {
     cerr << usageMessage << endl;
     return 1;
   }
-  
+
+  Cipher test(argv[2], argv[4], true);
   return 0;
 }
