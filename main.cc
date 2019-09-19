@@ -61,7 +61,23 @@ int main(int argc, char* argv[]) {
     cerr << usageMessage << endl;
     return 1;
   }
+  string cipherType     = argv[1];
+  string inputFileName  = argv[2];
+  string outputFileName = argv[3];
+  string keyFileName    = argv[4];
+  string mode           = argv[5];
 
-  Cipher test(argv[2], argv[4], true);
+  if (cipherType == "B") {
+    Cipher blockCipher(inputFileName, keyFileName, outputFileName, true);
+    if (mode == "E") {
+      blockCipher.encryptBlocks();
+    }
+    else {
+      blockCipher.decryptBlocks();
+    }
+  }
+  else {
+    
+  }
   return 0;
 }
