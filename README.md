@@ -4,7 +4,8 @@
 This program's purpose is to encrypt and decrypt either a **block** or a **stream** of data, given to it by an input file specified in the arguments.
 It takes this encrypted / decrypted data, and writes it to an output file specified in the arguments.
 
-## Operation
+---
+
 The program takes 5 arguments: `<cipher_type> <inputfile> <outputfile> <keyfile> <mode>`
 - `<cipher_type>` should be either the character **B** for block encryption, or **S** for stream encryption.
 - `<inputfile>` should be the path to the file (absolute or relative) to your data you would like ciphered.
