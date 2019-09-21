@@ -168,18 +168,3 @@ void Cipher::cipherStream() {
   
   out.close();
 }
-
-void Cipher::printVector(vector<char> & vect) {
-  for (char c: vect) {
-    cout << c;
-  }
-  cout << '\n';
-
-}
-
-void Cipher::printBlock(char * block) {
-  for (int i = 0; i < 8; ++i) {
-    cout << block[i];
-  }
-  cout << "\n";
-}

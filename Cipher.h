@@ -29,8 +29,6 @@ class Cipher {
     char blockKey[8];
     
     char * encryptedBlock(char *);
-    void printBlock(char *);  
-    void printVector(std::vector<char> &);
     void writeBlockToFile(char *, bool);
     char * swappedBytes(char *);
     char * unswappedBytes(char *);
