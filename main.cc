@@ -54,7 +54,7 @@ bool fileExists(string & filename) {
 }
 
 
-// ------ Main Program ------
+// ------ Main Program ---------
 
 int main(int argc, char* argv[]) {
   if (!argumentsAreValid(argc, argv)) {
@@ -78,12 +78,7 @@ int main(int argc, char* argv[]) {
   }
   else {
     Cipher streamCipher(inputFileName, keyFileName, outputFileName, false);
-    if (mode == "E") {
-      streamCipher.encryptStream();
-    }
-    else {
-      streamCipher.decryptStream();
-    }    
+    streamCipher.cipherStream();
   }
   return 0;
 }

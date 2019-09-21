@@ -16,9 +16,7 @@ class Cipher {
     void encryptBlocks();
     void decryptBlocks();
 
-    void encryptStream();
-    void decryptStream();
-
+    void cipherStream();
 
   private:
     std::ofstream out;
