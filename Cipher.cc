@@ -1,5 +1,6 @@
 #include "Cipher.h"
 #include <fstream>
+#include <vector>
 
 using namespace std;
 
@@ -15,6 +16,18 @@ Cipher::Cipher(string inputfile, string keyfile, string outfile, bool blockMode)
     while (keyInputStream.get(c) && i < 8) {
       blockKey[i++] = c;
     }
+  }
+  else {
+    // Read the key file into the streamKey vector since we are in stream cipher mode
+    ifstream in(keyFileName);
+    char c;
+    while (in.get(c)) {
+      streamKey.push_back(c);
+    }
+    if (!in.eof()) {
+      cerr << "Problem reading key!\n";
+    }
+    printVector(streamKey);
   }
 }
 
@@ -168,13 +181,47 @@ void Cipher::swap(char * i, char * j) {
 }
 
 
-void encryptStream() {
+void Cipher::encryptStream() {
   cout << "Encrypting stream... \n\n";
-
+  int keySize = streamKey.size();
+  keySize--; // To account for EOF
+  out.open(outputFileName);
+  ifstream in(inputFileName);
+  
+  int byteCounter = 0;
+  char currentChar;
+  while (in.get(currentChar)) {
+    cout << currentChar;
+    cout << streamKey[byteCounter % keySize] << '\n';
+    out << (char) (currentChar ^ (streamKey[byteCounter++ % keySize]));
+  }
+  
+  out.close();
 }
 
-void decryptStream() {
-  cout << "Decryting stream... \n\n";
-
+void Cipher::decryptStream() {
+  cout << "Decrypting stream... \n\n";
+  int keySize = streamKey.size();
+  out.open(outputFileName);
+  ifstream in(inputFileName);
+  
+  keySize--; // To account for EOF
+  int byteCounter = 0;
+  char currentChar;
+  while (in.get(currentChar)) {
+    cout << currentChar;
+    cout << streamKey[byteCounter % keySize] << '\n';
+    out << (char) (currentChar ^ (streamKey[byteCounter++ % keySize]));
+  }
+  
+  out.close();
 }
 
+
+void Cipher::printVector(vector<char> & vect) {
+  for (char c: vect) {
+    cout << c;
+  }
+  cout << '\n';
+
+}

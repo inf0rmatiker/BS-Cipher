@@ -27,11 +27,12 @@ class Cipher {
     std::string outputFileName;
     bool isBlockCipher;
      
-    std::vector<std::string> streamKey;
+    std::vector<char> streamKey;
     char blockKey[8];
-
+    
     char * encryptedBlock(char *);
     void printBlock(char *);  
+    void printVector(std::vector<char> &);
     void writeBlockToFile(char *, bool);
     char * swappedBytes(char *);
     char * unswappedBytes(char *);

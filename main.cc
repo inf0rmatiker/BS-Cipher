@@ -77,7 +77,13 @@ int main(int argc, char* argv[]) {
     }
   }
   else {
-    
+    Cipher streamCipher(inputFileName, keyFileName, outputFileName, false);
+    if (mode == "E") {
+      streamCipher.encryptStream();
+    }
+    else {
+      streamCipher.decryptStream();
+    }    
   }
   return 0;
 }
