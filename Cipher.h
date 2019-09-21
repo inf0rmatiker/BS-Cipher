@@ -16,9 +16,7 @@ class Cipher {
     void encryptBlocks();
     void decryptBlocks();
 
-    void encryptStream();
-    void decryptStream();
-
+    void cipherStream();
 
   private:
     std::ofstream out;
@@ -27,11 +25,10 @@ class Cipher {
     std::string outputFileName;
     bool isBlockCipher;
      
-    std::vector<std::string> streamKey;
+    std::vector<char> streamKey;
     char blockKey[8];
-
+    
     char * encryptedBlock(char *);
-    void printBlock(char *);  
     void writeBlockToFile(char *, bool);
     char * swappedBytes(char *);
     char * unswappedBytes(char *);
