@@ -27,7 +27,6 @@ Cipher::Cipher(string inputfile, string keyfile, string outfile, bool blockMode)
     if (!in.eof()) {
       cerr << "Problem reading key!\n";
     }
-    printVector(streamKey);
   }
 }
 
