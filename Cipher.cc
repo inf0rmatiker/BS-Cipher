@@ -16,6 +16,8 @@ Cipher::Cipher(string inputfile, string keyfile, string outfile, bool blockMode)
     while (keyInputStream.get(c) && i < 8) {
       blockKey[i++] = c;
     }
+    // Allocate char vector for encrypted file contents on heap
+    encryptedContents = new vector<char>();
   }
   else {
     // Read the key file into the streamKey vector since we are in stream cipher mode
@@ -30,123 +32,109 @@ Cipher::Cipher(string inputfile, string keyfile, string outfile, bool blockMode)
   }
 }
 
+/* Destructor */
+Cipher::~Cipher() {
+  delete encryptedContents;
+}
+
 /* --------- BLOCK CIPHERING ------------- */
 
 /* Encrypts all blocks of the input file, writing the encrypted
-    output to the outputfile. Uses the key from the keyfile.
-    We read the input file one block at a time, and write the
-    encrypted block to the output file as we go. */
+ * output to the outputfile. Uses the key from the keyfile.
+ */  
 void Cipher::encryptBlocks() {
-  ifstream in(inputFileName);
   out.open(outputFileName);
-
-  int charCounter = 0;
-  char plaintextBlock[8];
-  char c;
-  while (in.get(c)) {
-    plaintextBlock[charCounter] = c;
-    if (charCounter == 7) {
-      // Handle full plaintext block
-      writeBlockToFile(swappedBytes(encryptedBlock(plaintextBlock)), true); 
-      charCounter = 0;
-    }
-    else {
-      // Continue reading characters
-      ++charCounter;
-    } 
-  }
-  
-  if (!in.eof()) {
-    // Could not read, but not at end of file
-    cerr << "Something went wrong while reading file " << inputFileName << '\n';
-  }
-  else if (plaintextBlock[0] != (char) 0x80) {
-    // Pad the last incomplete block to 64 bits
-    for (int i = charCounter-1; i < 8; ++i) {
-      plaintextBlock[i] = (char) 0x80;
-    }
-    writeBlockToFile(swappedBytes(encryptedBlock(plaintextBlock)), true);
-  }
+  readFile();
+  padChars();
+  xorBytes();
+  swapContents();
+  writeOut(true);
   out.close();
 }
 
 /* Read the encrypted input file, and write the decrypted
-    plaintext to the output file. We read one encrypted block
-    at a time, and write the decrypted block to the output
-    file, with any padding removed.
-*/
+ * plaintext to the output file.
+ */
 void Cipher::decryptBlocks() {
-  ifstream in(inputFileName);
   out.open(outputFileName); 
-  int charCounter = 0;
-  char encryptedSwappedBlock[8];
-  char c;
-  while (in.get(c)) {
-    encryptedSwappedBlock[charCounter] = c;
-    if (charCounter == 7) {
-      // Handle full encrypted and swapped block
-      writeBlockToFile(encryptedBlock(swappedBytes(encryptedSwappedBlock)), false);
-      charCounter = 0;
-    }
-    else {
-      // Continue reading characters
-      ++charCounter;
-    }
-  }
+  readFile();  
+  swapContents();   
+  xorBytes(); 
+  writeOut(false); 
   out.close();
 }
 
 /* Helper function for encryption, swaps the bytes
-    of a block according to the key.
-*/
-char * Cipher::swappedBytes(char * encryptedBlock) {
-  char * start = encryptedBlock;
-  char * end   = encryptedBlock + 7;
-  int value;
-  for (int i = 0; i < 8; ++i) {
-    value = abs(blockKey[i] % 2);
-    if (end > start) {
-      if (value == 0) {
-        ++start;
-      }
-      else {
-        swap(start++, end--);
-      }
-    }
-    else break;
-  }
-  return encryptedBlock;
-}
-
-/* Writes the completed block to the output file.
-    We are assuming that Cipher::out has already been
-    opened for us in a calling function.
-*/
-void Cipher::writeBlockToFile(char * block, bool writePadding) {;
-  for (int i = 0; i < 8; ++i) {
-    if (!writePadding && block[i] == (char) 0x80) {
-      continue;
-    }
-    else {
-      out << block[i];
+ * of the contents according to the key.
+ */
+void Cipher::swapContents() {
+  int size = encryptedContents->size();
+  for (int start = 0, end = size - 1; start < end; ++start) {
+    //cout << "Start: " << start << " End: " << end << '\n';
+    if (blockKey[start % 8] % 2 == 1){
+      //cout << (*encryptedContents)[start] << " " << (*encryptedContents)[end] << " "; 
+      swapChars(start, end--);
+      //printEncryptedContents();
     }
   }
 }
 
-/* Encrypts the plaintext block by XOR'ing every
-    byte with the corresponding byte of the key.
-*/
-char * Cipher::encryptedBlock(char * plaintext) {
-  for (int i = 0; i < 8; ++i) {
-    plaintext[i] ^= blockKey[i % 8];
+/* Pads the encrypted contents with 0x80 chars
+ * so that the encrypted size is a multiple of 64 bits. 
+ */
+void Cipher::padChars() {
+  int requiredPadding = (8 - (encryptedContents->size() % 8));
+  for (int i = 0; i < requiredPadding; i++) {
+    encryptedContents->push_back((char) 0x80);
   }
-  return plaintext;
+  //printEncryptedContents(); // TODO: Remove
 }
 
-void Cipher::swap(char * i, char * j) {
-  char temp = *i;
-  *i = *j;
-  *j = temp;
+
+/* Reads either plaintext or ciphertext into
+ * the encryptedContents vector.
+ */
+void Cipher::readFile() {
+  ifstream in(inputFileName);
+  encryptedContents->clear();
+  char c;
+  while (in.get(c)) {  
+    encryptedContents->push_back(c);
+  }
+}
+
+/* Writes the completed vector out to the "out" file. 
+ * We are assuming that Cipher::out has already been
+ * opened for us in a calling function.
+ */
+void Cipher::writeOut(bool writePadding) {;
+  for (auto c: *encryptedContents) {
+    if (writePadding || c != (char) 0x80) {
+      out << c;
+    }
+  } 
+}
+
+void Cipher::printEncryptedContents() {
+  for (auto c: *encryptedContents)
+    cout << c;
+  cout << '\n'; 
+}
+
+/* Encrypts/decrypts by XOR'ing every
+ * byte with the corresponding byte of the key.
+ */
+void Cipher::xorBytes() {
+  int size = encryptedContents->size();
+  for (int i = 0; i < size; i++) {
+    (*encryptedContents)[i] ^= blockKey[i % 8];
+  }
+}
+
+void Cipher::swapChars(int i, int j) {
+  char temp = (*encryptedContents)[i];
+  (*encryptedContents)[i] = (*encryptedContents)[j];
+  (*encryptedContents)[j] = temp;
 }
 
 /* ------------ STREAM CIPHER ------------ */
@@ -158,7 +146,7 @@ void Cipher::cipherStream() {
   out.open(outputFileName);
   ifstream in(inputFileName);
   
-  int keySize = streamKey.size() - 1; // To account for EOF
+  int keySize = streamKey.size(); 
   int byteCounter = 0;
   char currentChar;
   while (in.get(currentChar)) {

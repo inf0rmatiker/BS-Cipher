@@ -9,13 +9,11 @@
 
 class Cipher {
   public:
-    
     Cipher(std::string, std::string, std::string, bool);
-    ~Cipher() = default;
+    ~Cipher();
   
     void encryptBlocks();
     void decryptBlocks();
-
     void cipherStream();
 
   private:
@@ -24,16 +22,17 @@ class Cipher {
     std::string inputFileName;
     std::string outputFileName;
     bool isBlockCipher;
-     
+    std::vector<char> * encryptedContents;     
     std::vector<char> streamKey;
     char blockKey[8];
     
-    char * encryptedBlock(char *);
-    void writeBlockToFile(char *, bool);
-    char * swappedBytes(char *);
-    char * unswappedBytes(char *);
-    void swap(char *, char *);
-
+    void readFile();
+    void writeOut(bool);
+    void swapContents();
+    void padChars();
+    void swapChars(int, int);
+    void xorBytes();
+    void printEncryptedContents();
 };
 
 #endif /* CIPHER_H_INCLUDED */
